@@ -1,0 +1,7 @@
+/*
+
+!/.gitignore
+!/nix
+!/nix-darwin
+
+**/.DS_Store
