@@ -3,7 +3,12 @@
 --
 -- See the kickstart.nvim README for more information
 return {
-  { "folke/todo-comments.nvim" },
+  {
+    "folke/todo-comments.nvim",
+    config = function()
+      require('todo-comments').setup({})
+    end
+  },
   {
     "nvim-pack/nvim-spectre",
     cmd = "Spectre",
@@ -21,7 +26,7 @@ return {
       "sindrets/diffview.nvim",        -- optional
       "ibhagwan/fzf-lua",              -- optional
     },
-    config = function ()
+    config = function()
       local neogit = require('neogit')
       neogit.setup({})
       vim.keymap.set('n', '<leader>g', neogit.open, { desc = 'Neo[G]it' })
@@ -65,4 +70,18 @@ return {
       require('mini.cursorword').setup()
     end
   },
+  {
+    "Eandrju/cellular-automaton.nvim",
+    config = function()
+      vim.keymap.set("n", "<leader>fml", "<cmd>CellularAutomaton game_of_life<CR>",
+        { desc = "Game of [L]ife", silent = true })
+      vim.keymap.set("n", "<leader>fmr", "<cmd>CellularAutomaton make_it_rain<CR>",
+        { desc = "Make it [R]ain", silent = true })
+
+      require('which-key').register({
+        ['<leader>f'] = { name = '[F]***', _ = 'which_key_ignore' },
+        ['<leader>fm'] = { name = '[M]y', _ = 'which_key_ignore' },
+      });
+    end
+  }
 }

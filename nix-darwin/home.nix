@@ -44,7 +44,7 @@ in
       }
 
       eval $(thefuck --alias)
-      '';
+    '';
 
     history = {
       save = 10000;
@@ -54,7 +54,7 @@ in
     zplug = {
       enable = true;
       plugins = [
-        { name = "zsh-users/zsh-autosuggestions"; } 
+        { name = "zsh-users/zsh-autosuggestions"; }
         { name = "zsh-users/zsh-syntax-highlighting"; tags = [ "defer:2" ]; }
         { name = "mafredri/zsh-async"; tags = [ "from:github" ]; }
         { name = "sindresorhus/pure"; tags = [ "use:pure.zsh" "as:theme" "from:github" ]; }
@@ -114,7 +114,7 @@ in
     fd
     tldr
     thefuck
-    
+
     neovim
 
     discord
@@ -148,23 +148,23 @@ in
       };
       lastAppsFile = "${config.xdg.stateHome}/nix/.apps";
     in
-      lib.hm.dag.entryAfter ["writeBoundary"] ''
-        last_apps=$(cat "${lastAppsFile}" 2>/dev/null || echo "")
-        next_apps=$(readlink -f ${apps}/Applications/* | sort)
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      last_apps=$(cat "${lastAppsFile}" 2>/dev/null || echo "")
+      next_apps=$(readlink -f ${apps}/Applications/* | sort)
 
-        if [ "$last_apps" != "$next_apps" ]; then
-          echo "Apps have changed. Updating macOS aliases..."
+      if [ "$last_apps" != "$next_apps" ]; then
+        echo "Apps have changed. Updating macOS aliases..."
 
-          apps_path="$HOME/Applications/NixApps"
-          $DRY_RUN_CMD mkdir -p "$apps_path"
+        apps_path="$HOME/Applications/NixApps"
+        $DRY_RUN_CMD mkdir -p "$apps_path"
 
-          $DRY_RUN_CMD ${pkgs.fd}/bin/fd \
-            -t l -d 1 . ${apps}/Applications \
-            -x $DRY_RUN_CMD "${flakePkg "github:reckenrode/mkAlias/8a5478cdb646f137ebc53cb9d235f8e5892ea00a"}/bin/mkalias" \
-            -L {} "$apps_path/{/}"
+        $DRY_RUN_CMD ${pkgs.fd}/bin/fd \
+          -t l -d 1 . ${apps}/Applications \
+          -x $DRY_RUN_CMD "${flakePkg "github:reckenrode/mkAlias/8a5478cdb646f137ebc53cb9d235f8e5892ea00a"}/bin/mkalias" \
+          -L {} "$apps_path/{/}"
 
-          [ -z "$DRY_RUN_CMD" ] && echo "$next_apps" > "${lastAppsFile}"
-        fi
-      ''
+        [ -z "$DRY_RUN_CMD" ] && echo "$next_apps" > "${lastAppsFile}"
+      fi
+    ''
   );
 }

@@ -188,6 +188,7 @@ require('lazy').setup({
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
 
+-- vim.o.colorcolumn = "80"
 vim.o.expandtab = true
 vim.o.tabstop = 2
 vim.o.softtabstop = 2
