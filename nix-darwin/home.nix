@@ -24,21 +24,27 @@ in
   programs.zsh = {
     enable = true;
 
+    autocd = true;
+
     shellAliases = {
       ls = "eza";
       l = "ls -la";
-      lt = "ls --tree";
-      ltg = "ls --tree --git-ignore";
+      lt = "ls --long --tree";
+      ltg = "ls --long --tree --git-ignore";
       ll = "ls -l";
-      config = "$EDITOR ~/.config/nix-darwin";
+      config = "nvim --cmd ':cd ~/.config'";
       update = "darwin-rebuild switch --flake ~/.config/nix-darwin";
-      bdctl = "NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix run --impure nixpkgs#betterdiscordctl";
     };
 
     initExtra = ''
-      # opam configuration
-      [[ ! -r /Users/bnrwrr/.opam/opam-init/init.zsh ]] || source /Users/bnrwrr/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
-    '';
+      bdctl() {
+        discord_modules="$(find ~/Library/Application\ Support/discord -name 'discord_desktop_core' -exec dirname {} \; | head -n 1)"
+        
+        NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix run --impure -- nixpkgs#betterdiscordctl --d-modules "$discord_modules" $@
+      }
+
+      eval $(thefuck --alias)
+      '';
 
     history = {
       save = 10000;
@@ -48,22 +54,27 @@ in
     zplug = {
       enable = true;
       plugins = [
-        { name = "zsh-users/zsh-autosuggestions"; } # Simple plugin installation
-        { name = "mafredri/zsh-async"; tags = [ from:github ]; }
-        { name = "sindresorhus/pure"; tags = [ use:pure.zsh as:theme from:github ]; } # Installations with additional options. For the list of options, please refer to Zplug README.
+        { name = "zsh-users/zsh-autosuggestions"; } 
+        { name = "zsh-users/zsh-syntax-highlighting"; tags = [ "defer:2" ]; }
+        { name = "mafredri/zsh-async"; tags = [ "from:github" ]; }
+        { name = "sindresorhus/pure"; tags = [ "use:pure.zsh" "as:theme" "from:github" ]; }
       ];
     };
   };
 
   programs.git = {
     enable = true;
-    userName  = "KripperOldman";
+    userName = "KripperOldman";
     userEmail = "binarywarrior76@gmail.com";
+    extraConfig = {
+      core.pager = "nvim -R";
+      color.pager = "no";
+    };
   };
 
   programs.kitty = {
     enable = true;
-    darwinLaunchOptions = [ "--start-as=fullscreen" ];
+    darwinLaunchOptions = [ "--start-as=fullscreen" "--single-instance" ];
     settings = {
       macos_traditional_fullscreen = true;
       macos_quit_when_last_window_closed = true;
@@ -75,7 +86,7 @@ in
     theme = "Catppuccin-Macchiato";
     font = {
       name = "FiraCode Nerd Font Mono";
-      size = lib.mkForce 14;
+      size = lib.mkForce 16;
     };
   };
 
@@ -88,7 +99,6 @@ in
     EDITOR = "nvim";
     VISUAL = "nvim";
     SUDO_EDITOR = "nvim";
-    PAGER = "nvim -R";
     MANPAGER = "nvim +Man!";
   };
 
@@ -101,6 +111,9 @@ in
     eza
     ripgrep
     fzf
+    fd
+    tldr
+    thefuck
     
     neovim
 

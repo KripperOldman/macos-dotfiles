@@ -20,7 +20,6 @@
       "firefox-developer-edition" 
       "mullvadvpn"
       "spotify"
-      "kitty"
     ];
     taps = [
       "homebrew/cask-versions"
@@ -52,6 +51,7 @@
 
   # Create /etc/zshrc that loads the nix-darwin environment.
   programs.zsh.enable = true;
+  programs.zsh.promptInit = "";
 
   # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;

@@ -268,8 +268,10 @@ require('telescope').setup {
 pcall(require('telescope').load_extension, 'fzf')
 
 -- See `:help telescope.builtin`
+
+
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = 'Find Recently Opened Files' })
-vim.keymap.set('n', '<leader><space>', require('telescope.builtin').git_files, { desc = 'Find File' })
+vim.keymap.set('n', '<leader><space>', require('custom.telescope-config').project_files, { desc = 'Find File' })
 vim.keymap.set('n', '<leader>/', require('telescope.builtin').live_grep, { desc = 'Live Grep' })
 
 vim.keymap.set('n', '<localleader><localleader>', require('telescope.builtin').buffers, { desc = 'Find Buffers' })
