@@ -1,5 +1,10 @@
 { config, pkgs, lib, ... }:
 
+let
+  # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
+  flakePkg = uri:
+    (builtins.getFlake uri).packages.aarch64-darwin.default;
+in
 {
   home.stateVersion = "22.05";
 
@@ -27,6 +32,7 @@
       ll = "ls -l";
       config = "$EDITOR ~/.config/nix-darwin";
       update = "darwin-rebuild switch --flake ~/.config/nix-darwin";
+      bdctl = "NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix run --impure nixpkgs#betterdiscordctl";
     };
 
     initExtra = ''
@@ -49,6 +55,12 @@
     };
   };
 
+  programs.git = {
+    enable = true;
+    userName  = "KripperOldman";
+    userEmail = "binarywarrior76@gmail.com";
+  };
+
   programs.kitty = {
     enable = true;
     darwinLaunchOptions = [ "--start-as=fullscreen" ];
@@ -68,7 +80,7 @@
   };
 
   programs.neovim = {
-    programs.neovim.extraConfig = lib.fileContents ./nvim/init.lua;
+    extraLuaConfig = lib.fileContents ../nvim/init.lua;
     vimAlias = true;
   };
 
@@ -86,18 +98,23 @@
     curl
     wget
 
-    eza.out
-    ripgrep.out
-    fzf.out
+    eza
+    ripgrep
+    fzf
     
     neovim
+
+    discord
 
     # Dev stuff
     jq
     nodePackages.typescript
     nodejs
+    python3
+    jdk21
     mercurial
-    opam
+    cargo
+    rustc
 
     # Useful nix related tools
     cachix # adding/managing alternative binary caches hosted by Cachix
@@ -107,4 +124,34 @@
     cocoapods
     m-cli # useful macOS CLI commands
   ];
+
+  # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
+  home.activation.aliasApplications = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
+    let
+      apps = pkgs.buildEnv {
+        name = "home-manager-applications";
+        paths = config.home.packages;
+        pathsToLink = "/Applications";
+      };
+      lastAppsFile = "${config.xdg.stateHome}/nix/.apps";
+    in
+      lib.hm.dag.entryAfter ["writeBoundary"] ''
+        last_apps=$(cat "${lastAppsFile}" 2>/dev/null || echo "")
+        next_apps=$(readlink -f ${apps}/Applications/* | sort)
+
+        if [ "$last_apps" != "$next_apps" ]; then
+          echo "Apps have changed. Updating macOS aliases..."
+
+          apps_path="$HOME/Applications/NixApps"
+          $DRY_RUN_CMD mkdir -p "$apps_path"
+
+          $DRY_RUN_CMD ${pkgs.fd}/bin/fd \
+            -t l -d 1 . ${apps}/Applications \
+            -x $DRY_RUN_CMD "${flakePkg "github:reckenrode/mkAlias/8a5478cdb646f137ebc53cb9d235f8e5892ea00a"}/bin/mkalias" \
+            -L {} "$apps_path/{/}"
+
+          [ -z "$DRY_RUN_CMD" ] && echo "$next_apps" > "${lastAppsFile}"
+        fi
+      ''
+  );
 }

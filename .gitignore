@@ -3,5 +3,7 @@
 !/.gitignore
 !/nix
 !/nix-darwin
+!/nvim
+/nvim/lazy-lock.json
 
 **/.DS_Store
