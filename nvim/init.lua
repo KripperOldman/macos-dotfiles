@@ -271,8 +271,11 @@ pcall(require('telescope').load_extension, 'fzf')
 -- See `:help telescope.builtin`
 
 
+vim.keymap.set('n', 'H', '<cmd>bp<cr>', { desc = 'Previous Buffer' })
+vim.keymap.set('n', 'L', '<cmd>bn<cr>', { desc = 'Next Buffer' })
+
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = 'Find Recently Opened Files' })
-vim.keymap.set('n', '<leader><space>', require('custom.telescope-config').project_files, { desc = 'Find File' })
+vim.keymap.set('n', '<leader><space>', require('telescope.builtin').find_files, { desc = 'Find File' })
 vim.keymap.set('n', '<leader>/', require('telescope.builtin').live_grep, { desc = 'Live Grep' })
 
 vim.keymap.set('n', '<localleader><localleader>', require('telescope.builtin').buffers, { desc = 'Find Buffers' })
@@ -382,6 +385,8 @@ local on_attach = function(client, bufnr)
 
     vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
   end
+
+  nmap('<leader>cm', '<cmd>Mason<cr>', '[M]ason')
 
   nmap('<leader>crn', vim.lsp.buf.rename, 'Re[n]ame')
   nmap('<leader>ca', vim.lsp.buf.code_action, 'Code [A]ction')

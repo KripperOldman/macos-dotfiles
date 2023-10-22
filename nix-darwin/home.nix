@@ -37,13 +37,17 @@ in
     };
 
     initExtra = ''
+      # betterdiscordctl
       bdctl() {
         discord_modules="$(find ~/Library/Application\ Support/discord -name 'discord_desktop_core' -exec dirname {} \; | head -n 1)"
-        
         NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix run --impure -- nixpkgs#betterdiscordctl --d-modules "$discord_modules" $@
       }
 
+      # thefuck
       eval $(thefuck --alias)
+
+      # opam
+      [[ ! -r /Users/bnrwrr/.opam/opam-init/init.zsh ]] || source /Users/bnrwrr/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
     '';
 
     history = {
@@ -69,6 +73,7 @@ in
     extraConfig = {
       core.pager = "nvim -R";
       color.pager = "no";
+      init.defaultBranch = "main";
     };
   };
 
@@ -93,6 +98,10 @@ in
   programs.neovim = {
     extraLuaConfig = lib.fileContents ../nvim/init.lua;
     vimAlias = true;
+    defaultEditor = true;
+    withPython3 = true;
+    withNodeJs = true;
+    withRuby = true;
   };
 
   home.sessionVariables = {
@@ -107,6 +116,10 @@ in
     coreutils
     curl
     wget
+    gawk
+    csvquote
+    moreutils
+    gnupg
 
     eza
     ripgrep
@@ -116,6 +129,7 @@ in
     thefuck
 
     neovim
+    tree-sitter
 
     discord
 
@@ -128,6 +142,9 @@ in
     mercurial
     cargo
     rustc
+    prettierd
+
+    opam
 
     # Useful nix related tools
     cachix # adding/managing alternative binary caches hosted by Cachix

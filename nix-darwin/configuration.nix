@@ -17,7 +17,7 @@
     brews = [
     ];
     casks = [
-      "firefox-developer-edition" 
+      "firefox-developer-edition"
       "mullvadvpn"
       "spotify"
     ];
@@ -67,9 +67,9 @@
   # Fonts
   fonts.fontDir.enable = true;
   fonts.fonts = with pkgs; [
-     recursive
-     (nerdfonts.override { fonts = [ "FiraCode" "JetBrainsMono" ]; })
-   ];
+    recursive
+    (nerdfonts.override { fonts = [ "FiraCode" "JetBrainsMono" ]; })
+  ];
 
   # Keyboard
   system.keyboard.enableKeyMapping = true;
@@ -77,4 +77,10 @@
 
   # Add ability to used TouchID for sudo authentication
   security.pam.enableSudoTouchIdAuth = true;
+
+  nix.gc = {
+    automatic = true;
+    interval = { Weekday = 0; Hour = 0; Minute = 0; };
+    options = "--delete-older-than 30d";
+  };
 }

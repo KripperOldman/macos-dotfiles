@@ -83,5 +83,20 @@ return {
         ['<leader>fm'] = { name = '[M]y', _ = 'which_key_ignore' },
       });
     end
-  }
+  },
+  {
+    "nvimtools/none-ls.nvim",
+    config = function()
+      local null_ls = require("null-ls")
+
+      null_ls.setup({
+        sources = {
+          null_ls.builtins.formatting.stylua,
+          null_ls.builtins.formatting.ocamlformat,
+          null_ls.builtins.completion.spell,
+          null_ls.builtins.formatting.prettierd,
+        },
+      })
+    end
+  },
 }
