@@ -9,7 +9,7 @@ You should replace these with your own username.
 
 [Install Nix](https://nixos.org/manual/nix/unstable/installation/installation.html)  
 [Install Homebrew](https://brew.sh) for packages not in Nixpkg.  
-Note: We manage Homebrew packages with Home Manager [config](./nix-darwin/home.nix) but need to install it separately.  
+Note: We manage Homebrew packages with Nix Darwin [config](./nix-darwin/configuration.nix) but need to install it separately.  
   
 Copy this repo to `~/.config`  
 For building the config the first time, run  
