@@ -3,6 +3,7 @@
 !/.gitignore
 !/nix
 !/nix-darwin
+/nix-darwin/result
 !/nvim
 !README.md
 /nvim/lazy-lock.json
