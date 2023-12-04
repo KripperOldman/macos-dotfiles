@@ -8,4 +8,9 @@
 !README.md
 /nvim/lazy-lock.json
 
+!/clojure
+/clojure/.clj-kondo
+/clojure/.cpcache
+/clojure/.lsp
+
 **/.DS_Store

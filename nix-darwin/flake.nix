@@ -12,64 +12,78 @@
 
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";
+
+    # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
+    mac-app-util.url = "github:hraban/mac-app-util";
   };
 
-  outputs = { self, darwin, nixpkgs, home-manager, ... }@inputs:
-  let 
+  # HACK: remove `mac-app-util` when https://github.com/nix-community/home-manager/issues/1341 gets fixed
+  outputs = { self, darwin, nixpkgs, home-manager, mac-app-util, ... }@inputs:
+    let
 
-    inherit (darwin.lib) darwinSystem;
-    inherit (inputs.nixpkgs-unstable.lib) attrValues makeOverridable optionalAttrs singleton;
+      inherit (darwin.lib) darwinSystem;
+      inherit (inputs.nixpkgs-unstable.lib) attrValues makeOverridable optionalAttrs singleton;
 
-    # Configuration for `nixpkgs`
-    nixpkgsConfig = {
-      config = { allowUnfree = true; };
-      overlays = attrValues self.overlays ++ singleton (
-        # Sub in x86 version of packages that don't build on Apple Silicon yet
-        final: prev: (optionalAttrs (prev.stdenv.system == "aarch64-darwin") {
-          inherit (final.pkgs-x86)
-            niv;
-        })
-      );
-    }; 
-  in
-  {
-    # My `nix-darwin` configs
-      
-    darwinConfigurations = rec {
-      macbook-air = darwinSystem {
-        system = "aarch64-darwin";
-        modules = attrValues self.darwinModules ++ [ 
-          # Main `nix-darwin` config
-          ./configuration.nix
-          # `home-manager` module
-          home-manager.darwinModules.home-manager
-          {
-            nixpkgs = nixpkgsConfig;
-            # `home-manager` config
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.bnrwrr = import ./home.nix;            
-          }
-        ];
+      # Configuration for `nixpkgs`
+      nixpkgsConfig = {
+        config = { allowUnfree = true; };
+        overlays = attrValues self.overlays ++ singleton (
+          # Sub in x86 version of packages that don't build on Apple Silicon yet
+          final: prev: (optionalAttrs (prev.stdenv.system == "aarch64-darwin") {
+            inherit (final.pkgs-x86)
+              niv;
+          })
+        );
       };
-    };
+    in
+    {
+      # My `nix-darwin` configs
 
-    # Overlays --------------------------------------------------------------- {{{
+      darwinConfigurations = rec {
+        macbook-air = darwinSystem {
+          system = "aarch64-darwin";
+          modules = attrValues self.darwinModules ++ [
 
-    overlays = {
-      # Overlays to add various packages into package set
-      # Overlay useful on Macs with Apple Silicon
+            # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
+            mac-app-util.darwinModules.default
+
+            # Main `nix-darwin` config
+            ./configuration.nix
+            # `home-manager` module
+            home-manager.darwinModules.home-manager
+            {
+              nixpkgs = nixpkgsConfig;
+              # `home-manager` config
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.bnrwrr.imports = [
+
+                # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
+                mac-app-util.homeManagerModules.default
+
+                ./home.nix
+              ];
+            }
+          ];
+        };
+      };
+
+      # Overlays --------------------------------------------------------------- {{{
+
+      overlays = {
+        # Overlays to add various packages into package set
+        # Overlay useful on Macs with Apple Silicon
         apple-silicon = final: prev: optionalAttrs (prev.stdenv.system == "aarch64-darwin") {
           # Add access to x86 packages system is running Apple Silicon
           pkgs-x86 = import inputs.nixpkgs-unstable {
             system = "x86_64-darwin";
             inherit (nixpkgsConfig) config;
           };
-        }; 
+        };
       };
 
-    # My `nix-darwin` modules that are pending upstream, or patched versions waiting on upstream
-    # fixes.
-    darwinModules = {};
- };
+      # My `nix-darwin` modules that are pending upstream, or patched versions waiting on upstream
+      # fixes.
+      darwinModules = { };
+    };
 }

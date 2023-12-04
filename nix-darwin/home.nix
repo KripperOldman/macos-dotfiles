@@ -37,6 +37,8 @@ in
     };
 
     initExtra = ''
+      PATH="$PATH:/opt/homebrew/bin"
+
       # betterdiscordctl
       bdctl() {
         discord_modules="$(find ~/Library/Application\ Support/discord -name 'discord_desktop_core' -exec dirname {} \; | head -n 1)"
@@ -48,6 +50,9 @@ in
 
       # opam
       [[ ! -r /Users/bnrwrr/.opam/opam-init/init.zsh ]] || source /Users/bnrwrr/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
+
+      # TMUX
+      [[ "$TERM" == "xterm-kitty" ]] && tmux new -A -s main
     '';
 
     history = {
@@ -68,8 +73,23 @@ in
 
   programs.git = {
     enable = true;
-    userName = "KripperOldman";
-    userEmail = "binarywarrior76@gmail.com";
+    aliases = {
+      ignore = "!gi() { curl -sL https://www.toptal.com/developers/gitignore/api/$@ ;}; gi";
+    };
+    includes = [
+      {
+        path = "~/Workspace/personal/.gitconfig_include";
+        condition = "gitdir:~/Workspace/personal/";
+      }
+      {
+        path = "~/Workspace/kripper/.gitconfig_include";
+        condition = "gitdir:~/Workspace/kripper/";
+      }
+      {
+        path = "~/Workspace/work/.gitconfig_include";
+        condition = "gitdir:~/Workspace/work/";
+      }
+    ];
     extraConfig = {
       core.pager = "nvim -R";
       color.pager = "no";
@@ -95,6 +115,36 @@ in
     };
   };
 
+  programs.tmux = {
+    enable = true;
+    prefix = "C-a";
+    terminal = "screen-256color";
+    baseIndex = 1;
+    mouse = true;
+    historyLimit = 10000;
+    plugins = [
+      {
+        plugin = pkgs.tmuxPlugins.catppuccin;
+        extraConfig = ''
+          set -g @catppuccin-flavour 'machhiato'
+          set -g @catppuccin-powerline-icons-theme-enabled 'on'
+          set -g @catppuccin-l-left-separator ''
+          set -g @catppuccin-l-right-separator ''
+          set -g @catppuccin-r-left-separator ''
+          set -g @catppuccin-r-right-separator ''
+        '';
+      }
+      pkgs.tmuxPlugins.pain-control
+      pkgs.tmuxPlugins.yank
+    ];
+    extraConfig = ''
+      # Better Vi Copy Mode Bindings
+
+      bind-key -T copy-mode-vi 'v' send -X begin-selection
+      bind-key -T copy-mode-vi 'y' send -X copy-selection-and-cancel
+    '';
+  };
+
   programs.neovim = {
     extraLuaConfig = lib.fileContents ../nvim/init.lua;
     vimAlias = true;
@@ -118,7 +168,7 @@ in
     wget
     gawk
     csvquote
-    moreutils
+    parallel
     gnupg
 
     eza
@@ -128,10 +178,14 @@ in
     tldr
     thefuck
 
+    vim
     neovim
+    page
     tree-sitter
 
     discord
+
+    gimp
 
     # Dev stuff
     jq
@@ -139,49 +193,61 @@ in
     nodejs
     python3
     jdk21
+    maven
     mercurial
     cargo
     rustc
     prettierd
+    go
+    clojure
+    babashka
 
     opam
+
+    postgresql
+
+    kitty
 
     # Useful nix related tools
     cachix # adding/managing alternative binary caches hosted by Cachix
     comma # run software from without installing it
     niv # easy dependency management for nix projects
-  ] ++ lib.optionals stdenv.isDarwin [
-    cocoapods
-    m-cli # useful macOS CLI commands
-  ];
+  ] ++ lib.optionals
+    stdenv.isDarwin
+    [
+      cocoapods
+      m-cli # useful macOS CLI commands
+    ];
 
   # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
-  home.activation.aliasApplications = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
-    let
-      apps = pkgs.buildEnv {
-        name = "home-manager-applications";
-        paths = config.home.packages;
-        pathsToLink = "/Applications";
-      };
-      lastAppsFile = "${config.xdg.stateHome}/nix/.apps";
-    in
-    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      last_apps=$(cat "${lastAppsFile}" 2>/dev/null || echo "")
-      next_apps=$(readlink -f ${apps}/Applications/* | sort)
+  home.activation.aliasApplications = lib.mkIf
+    pkgs.stdenv.hostPlatform.isDarwin
+    (
+      let
+        apps = pkgs.buildEnv {
+          name = "home-manager-applications";
+          paths = config.home.packages;
+          pathsToLink = "/Applications";
+        };
+        lastAppsFile = "${config.xdg.stateHome}/nix/.apps";
+      in
+      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        last_apps=$(cat "${lastAppsFile}" 2>/dev/null || echo "")
+        next_apps=$(readlink -f ${apps}/Applications/* | sort)
 
-      if [ "$last_apps" != "$next_apps" ]; then
-        echo "Apps have changed. Updating macOS aliases..."
+        if [ "$last_apps" != "$next_apps" ]; then
+          echo "Apps have changed. Updating macOS aliases..."
 
-        apps_path="$HOME/Applications/NixApps"
-        $DRY_RUN_CMD mkdir -p "$apps_path"
+          apps_path="$HOME/Applications/NixApps"
+          $DRY_RUN_CMD mkdir -p "$apps_path"
 
-        $DRY_RUN_CMD ${pkgs.fd}/bin/fd \
-          -t l -d 1 . ${apps}/Applications \
-          -x $DRY_RUN_CMD "${flakePkg "github:reckenrode/mkAlias/8a5478cdb646f137ebc53cb9d235f8e5892ea00a"}/bin/mkalias" \
-          -L {} "$apps_path/{/}"
+          $DRY_RUN_CMD ${pkgs.fd}/bin/fd \
+            -t l -d 1 . ${apps}/Applications \
+            -x $DRY_RUN_CMD "${flakePkg "github:reckenrode/mkAlias/8a5478cdb646f137ebc53cb9d235f8e5892ea00a"}/bin/mkalias" \
+            -L {} "$apps_path/{/}"
 
-        [ -z "$DRY_RUN_CMD" ] && echo "$next_apps" > "${lastAppsFile}"
-      fi
-    ''
-  );
+          [ -z "$DRY_RUN_CMD" ] && echo "$next_apps" > "${lastAppsFile}"
+        fi
+      ''
+    );
 }

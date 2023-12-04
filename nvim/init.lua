@@ -20,7 +20,6 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-
 vim.keymap.set('n', '<leader>l', require('lazy').show, { desc = '[L]azy' })
 
 -- NOTE: Here is where you install your plugins.
@@ -41,7 +40,9 @@ require('lazy').setup({
     'neovim/nvim-lspconfig',
     dependencies = {
       -- Automatically install LSPs to stdpath for neovim
-      'williamboman/mason.nvim',
+      {
+        'williamboman/mason.nvim',
+      },
       'williamboman/mason-lspconfig.nvim',
 
       -- Useful status updates for LSP
@@ -52,7 +53,9 @@ require('lazy').setup({
       'folke/neodev.nvim',
     },
   },
-
+  {
+    'nvimtools/none-ls.nvim',
+  },
   {
     -- Autocompletion
     'hrsh7th/nvim-cmp',
@@ -70,7 +73,7 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim',   opts = {} },
+  { 'folke/which-key.nvim', opts = {} },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -111,11 +114,11 @@ require('lazy').setup({
   },
 
   {
-    "catppuccin/nvim",
-    name = "catppuccin",
+    'catppuccin/nvim',
+    name = 'catppuccin',
     config = function(_, _)
-      vim.cmd.colorscheme("catppuccin-macchiato")
-    end
+      vim.cmd.colorscheme 'catppuccin-macchiato'
+    end,
   },
 
   {
@@ -156,8 +159,8 @@ require('lazy').setup({
   {
     'nvim-telescope/telescope-ui-select.nvim',
     config = function(_, _)
-      require("telescope").load_extension("ui-select")
-    end
+      require('telescope').load_extension 'ui-select'
+    end,
   },
 
   {
@@ -188,10 +191,13 @@ require('lazy').setup({
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
 
--- vim.o.colorcolumn = "80"
+vim.o.wrap = false;
+
+vim.o.colorcolumn = '80'
 vim.o.expandtab = true
 vim.o.tabstop = 2
 vim.o.softtabstop = 2
+vim.o.conceallevel = 2
 
 -- Set highlight on search
 vim.o.hlsearch = false
@@ -270,7 +276,6 @@ pcall(require('telescope').load_extension, 'fzf')
 
 -- See `:help telescope.builtin`
 
-
 vim.keymap.set('n', 'H', '<cmd>bp<cr>', { desc = 'Previous Buffer' })
 vim.keymap.set('n', 'L', '<cmd>bn<cr>', { desc = 'Next Buffer' })
 
@@ -279,8 +284,7 @@ vim.keymap.set('n', '<leader><space>', require('telescope.builtin').find_files, 
 vim.keymap.set('n', '<leader>/', require('telescope.builtin').live_grep, { desc = 'Live Grep' })
 
 vim.keymap.set('n', '<localleader><localleader>', require('telescope.builtin').buffers, { desc = 'Find Buffers' })
-vim.keymap.set('n', '<localleader>/', require('telescope.builtin').current_buffer_fuzzy_find,
-  { desc = 'Grep Current Buffer' })
+vim.keymap.set('n', '<localleader>/', require('telescope.builtin').current_buffer_fuzzy_find, { desc = 'Grep Current Buffer' })
 
 vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = 'Search [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = 'Search [H]elp' })
@@ -295,8 +299,21 @@ vim.defer_fn(function()
   ---@diagnostic disable-next-line: missing-fields
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim',
-      'bash' },
+    ensure_installed = {
+      'c',
+      'cpp',
+      'go',
+      'lua',
+      'python',
+      'rust',
+      'tsx',
+      'javascript',
+      'typescript',
+      'vimdoc',
+      'vim',
+      'bash',
+      'clojure',
+    },
 
     sync_install = false,
 
@@ -386,10 +403,8 @@ local on_attach = function(client, bufnr)
     vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
   end
 
-  nmap('<leader>cm', '<cmd>Mason<cr>', '[M]ason')
-
   nmap('<leader>crn', vim.lsp.buf.rename, 'Re[n]ame')
-  nmap('<leader>ca', vim.lsp.buf.code_action, 'Code [A]ction')
+  vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, { buffer = bufnr, desc = 'Code [A]ction' })
 
   nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
   nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
@@ -437,6 +452,7 @@ require('which-key').register {
 -- before setting up the servers.
 require('mason').setup()
 require('mason-lspconfig').setup()
+vim.keymap.set('n', '<leader>cm', '<cmd>Mason<cr>', { desc = '[M]ason' })
 
 -- Enable the following language servers
 --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -448,7 +464,7 @@ require('mason-lspconfig').setup()
 --  define the property 'filetypes' to the map in question.
 local servers = {
   clangd = {},
-  -- gopls = {},
+  gopls = {},
   pyright = {},
   rust_analyzer = {},
   tsserver = {},
@@ -489,6 +505,29 @@ mason_lspconfig.setup_handlers {
   end,
 }
 
+-- Null LS (https://github.com/nvimtools/none-ls.nvim)
+local null_ls = require 'null-ls'
+
+null_ls.setup {
+  sources = {
+    null_ls.builtins.formatting.stylua,
+    null_ls.builtins.formatting.black,
+    null_ls.builtins.formatting.sqlfmt,
+    null_ls.builtins.formatting.joker,
+    null_ls.builtins.diagnostics.clj_kondo,
+    null_ls.builtins.formatting.ocamlformat.with {
+      filetypes = { 'ocaml', 'reason' },
+    },
+    null_ls.builtins.completion.spell.with {
+      filetypes = { 'markdown', 'text', 'gitcommit', 'gitrebase' },
+    },
+    null_ls.builtins.formatting.prettierd.with {
+      filetypes = { 'javascript', 'typescript', 'json', 'yaml', 'html', 'css', 'scss', 'markdown' },
+    },
+  },
+  on_attach = on_attach,
+}
+
 -- [[ Configure nvim-cmp ]]
 -- See `:help cmp`
 local cmp = require 'cmp'
@@ -509,7 +548,7 @@ cmp.setup {
     ['<C-d>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete {},
-    ['<CR>'] = cmp.mapping.confirm {
+    ['<C-j>'] = cmp.mapping.confirm {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },

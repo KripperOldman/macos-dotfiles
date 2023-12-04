@@ -15,11 +15,15 @@
       cleanup = "zap";
     };
     brews = [
+      "ollama"
     ];
     casks = [
+      "dbeaver-community"
       "firefox-developer-edition"
       "mullvadvpn"
       "spotify"
+      "flameshot"
+      "openvpn-connect"
     ];
     taps = [
       "homebrew/cask-versions"
