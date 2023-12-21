@@ -24,6 +24,7 @@
       "spotify"
       "flameshot"
       "openvpn-connect"
+      "dyalog"
     ];
     taps = [
       "homebrew/cask-versions"

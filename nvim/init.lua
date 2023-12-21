@@ -191,7 +191,7 @@ require('lazy').setup({
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
 
-vim.o.wrap = false;
+vim.o.wrap = false
 
 vim.o.colorcolumn = '80'
 vim.o.expandtab = true
@@ -504,6 +504,11 @@ mason_lspconfig.setup_handlers {
     }
   end,
 }
+
+-- Custom LSP stuff
+vim.cmd([[au BufNewFile,BufRead *.v set filetype=vlang]])
+
+require('lspconfig').hls.setup {on_attach = on_attach}
 
 -- Null LS (https://github.com/nvimtools/none-ls.nvim)
 local null_ls = require 'null-ls'

@@ -20,6 +20,13 @@ return {
         cmp.setup(config)
       end,
     },
+    'gpanders/nvim-parinfer'
+    -- {
+    --   'tpope/vim-sexp-mappings-for-regular-people',
+    --   dependencies = {
+    --     'guns/vim-sexp',
+    --   },
+    -- },
   },
   config = function(_, opts)
     require('conjure.main').main()

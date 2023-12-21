@@ -34,10 +34,11 @@ in
       ll = "ls -l";
       config = "nvim --cmd ':cd ~/.config'";
       update = "darwin-rebuild switch --flake ~/.config/nix-darwin";
+      init-shell = "nix flake init -t github:nix-community/nix-direnv";
     };
 
     initExtra = ''
-      PATH="$PATH:/opt/homebrew/bin"
+      PATH="$PATH:/opt/homebrew/bin:$HOME/.cargo/bin"
 
       # betterdiscordctl
       bdctl() {
@@ -49,7 +50,7 @@ in
       eval $(thefuck --alias)
 
       # opam
-      [[ ! -r /Users/bnrwrr/.opam/opam-init/init.zsh ]] || source /Users/bnrwrr/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
+      # [[ ! -r /Users/bnrwrr/.opam/opam-init/init.zsh ]] || source /Users/bnrwrr/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
 
       # TMUX
       [[ "$TERM" == "xterm-kitty" ]] && tmux new -A -s main
@@ -202,7 +203,7 @@ in
     clojure
     babashka
 
-    opam
+    # opam
 
     postgresql
 
