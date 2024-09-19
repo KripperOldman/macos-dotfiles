@@ -6,7 +6,7 @@ let
     (builtins.getFlake uri).packages.aarch64-darwin.default;
 in
 {
-  home.stateVersion = "22.05";
+  home.stateVersion = "24.05";
 
   # https://github.com/malob/nixpkgs/blob/master/home/default.nix
 
@@ -35,10 +35,11 @@ in
       config = "nvim --cmd ':cd ~/.config'";
       update = "darwin-rebuild switch --flake ~/.config/nix-darwin";
       init-shell = "nix flake init -t github:nix-community/nix-direnv";
+      mknote = "nvim \"$(date -u +%Y-%m-%dT%H%M%SZ).md\"";
     };
 
     initExtra = ''
-      PATH="$PATH:/opt/homebrew/bin:$HOME/.cargo/bin"
+      PATH="$PATH:/opt/homebrew/bin:$HOME/.cargo/bin:$HOME/.local/bin"
 
       # betterdiscordctl
       bdctl() {
@@ -90,6 +91,10 @@ in
         path = "~/Workspace/work/.gitconfig_include";
         condition = "gitdir:~/Workspace/work/";
       }
+      {
+        path = "~/Workspace/school/.gitconfig_include";
+        condition = "gitdir:~/Workspace/school/";
+      }
     ];
     extraConfig = {
       core.pager = "nvim -R";
@@ -100,7 +105,6 @@ in
 
   programs.kitty = {
     enable = true;
-    darwinLaunchOptions = [ "--start-as=fullscreen" "--single-instance" ];
     settings = {
       macos_traditional_fullscreen = true;
       macos_quit_when_last_window_closed = true;
@@ -143,6 +147,9 @@ in
 
       bind-key -T copy-mode-vi 'v' send -X begin-selection
       bind-key -T copy-mode-vi 'y' send -X copy-selection-and-cancel
+
+      # For [image.nvim](https://github.com/3rd/image.nvim#tmux)
+      set -gq allow-passthrough on
     '';
   };
 
@@ -163,6 +170,8 @@ in
   };
 
   home.packages = with pkgs; [
+    unstable.neovim
+
     # Some basics
     coreutils
     curl
@@ -172,6 +181,7 @@ in
     parallel
     gnupg
 
+    direnv
     eza
     ripgrep
     fzf
@@ -180,13 +190,18 @@ in
     thefuck
 
     vim
-    neovim
+    # neovim
     page
     tree-sitter
 
+    ghidra
+
     discord
+    slack
 
     gimp
+    net-news-wire
+    mpv
 
     # Dev stuff
     jq
@@ -201,13 +216,26 @@ in
     prettierd
     go
     clojure
+    leiningen
     babashka
+    gcc
+    zig
+
+    aria
 
     # opam
 
     postgresql
 
     kitty
+    ueberzugpp
+
+    pass
+
+    # emacs
+    # emacs-macport
+    # texlive.combined.scheme-full
+    # pngpaste
 
     # Useful nix related tools
     cachix # adding/managing alternative binary caches hosted by Cachix

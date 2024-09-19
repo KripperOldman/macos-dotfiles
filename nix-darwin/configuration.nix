@@ -13,18 +13,39 @@
       autoUpdate = true;
       # remove all homebrew-installed things not listed here 
       cleanup = "zap";
+      extraFlags = [ "--verbose" ];
     };
     brews = [
-      "ollama"
+      # "ollama"
     ];
     casks = [
+      # "idafree"
+      "postman"
+      "adobe-acrobat-reader"
+      "bitwarden"
       "dbeaver-community"
-      "firefox-developer-edition"
+      "firefox@developer-edition"
       "mullvadvpn"
       "spotify"
       "flameshot"
       "openvpn-connect"
-      "dyalog"
+      "datagrip"
+      "clion"
+      "stremio"
+
+      "nheko" # matrix client
+
+      # "calibre"
+      # "kindle-previewer"
+      "vlc"
+
+      # "dyalog"
+
+      "zoom"
+
+      "logisim-evolution"
+
+      "microsoft-office"
     ];
     taps = [
       "homebrew/cask-versions"
@@ -70,8 +91,7 @@
   programs.nix-index.enable = true;
 
   # Fonts
-  fonts.fontDir.enable = true;
-  fonts.fonts = with pkgs; [
+  fonts.packages = with pkgs; [
     recursive
     (nerdfonts.override { fonts = [ "FiraCode" "JetBrainsMono" ]; })
   ];

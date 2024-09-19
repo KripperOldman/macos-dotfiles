@@ -79,12 +79,11 @@ return {
   {
     'Eandrju/cellular-automaton.nvim',
     config = function()
-      vim.keymap.set('n', '<leader>fml', '<cmd>CellularAutomaton game_of_life<CR>', { desc = 'Game of [L]ife', silent = true })
-      vim.keymap.set('n', '<leader>fmr', '<cmd>CellularAutomaton make_it_rain<CR>', { desc = 'Make it [R]ain', silent = true })
-
-      require('which-key').register {
-        ['<leader>f'] = { name = '[F]***', _ = 'which_key_ignore' },
-        ['<leader>fm'] = { name = '[M]y', _ = 'which_key_ignore' },
+      require('which-key').add {
+        { '<leader>f', group = '[F]***' },
+        { '<leader>fm', group = '[M]y' },
+        { '<leader>fml', '<cmd>CellularAutomaton game_of_life<CR>', desc = 'Game of [L]ife' },
+        { '<leader>fmr', '<cmd>CellularAutomaton make_it_rain<CR>', desc = 'Make it [R]ain' },
       }
     end,
   },
@@ -110,9 +109,13 @@ return {
   {
     'github/copilot.vim',
     config = function()
-      -- Change keymapping to <C-j>
+      vim.keymap.set('i', '<C-L>', 'copilot#Accept("")', {
+        expr = true,
+        replace_keycodes = false,
+      })
+      vim.g.copilot_assume_mapped = true
       vim.g.copilot_no_tab_map = true
-      vim.api.nvim_set_keymap('i', '<C-j>', 'copilot#Accept("<CR>")', { expr = true, silent = true })
+      vim.cmd 'Copilot disable'
     end,
   },
   {
@@ -127,4 +130,10 @@ return {
     end,
   },
   { 'fidian/hexmode' },
+  -- {
+  --   'jsongerber/thanks.nvim',
+  --   opts = {
+  --     plugin_manager = 'lazy',
+  --   },
+  -- },
 }

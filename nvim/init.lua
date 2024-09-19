@@ -20,8 +20,6 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-vim.keymap.set('n', '<leader>l', require('lazy').show, { desc = '[L]azy' })
-
 -- NOTE: Here is where you install your plugins.
 --  You can configure plugins using the `config` key.
 --
@@ -73,7 +71,14 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  {
+    'folke/which-key.nvim',
+    opts = {},
+    dependencies = {
+      'echasnovski/mini.icons',
+      'nvim-tree/nvim-web-devicons',
+    },
+  },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -87,28 +92,43 @@ require('lazy').setup({
         changedelete = { text = '~' },
       },
       on_attach = function(bufnr)
-        vim.keymap.set('n', '<leader>hp', require('gitsigns').preview_hunk, { buffer = bufnr, desc = 'Preview git hunk' })
-
-        -- don't override the built-in and fugitive keymaps
         local gs = package.loaded.gitsigns
-        vim.keymap.set({ 'n', 'v' }, ']c', function()
-          if vim.wo.diff then
-            return ']c'
-          end
-          vim.schedule(function()
-            gs.next_hunk()
-          end)
-          return '<Ignore>'
-        end, { expr = true, buffer = bufnr, desc = 'Jump to next hunk' })
-        vim.keymap.set({ 'n', 'v' }, '[c', function()
-          if vim.wo.diff then
-            return '[c'
-          end
-          vim.schedule(function()
-            gs.prev_hunk()
-          end)
-          return '<Ignore>'
-        end, { expr = true, buffer = bufnr, desc = 'Jump to previous hunk' })
+        require('which-key').add {
+          { '<leader>hp', require('gitsigns').preview_hunk, buffer = bufnr, desc = 'Preview git hunk' },
+          -- don't override the built-in and fugitive keymaps
+          {
+            ']c',
+            function()
+              if vim.wo.diff then
+                return ']c'
+              end
+              vim.schedule(function()
+                gs.next_hunk()
+              end)
+              return '<Ignore>'
+            end,
+            mode = { 'n', 'v' },
+            expr = true,
+            buffer = bufnr,
+            desc = 'Jump to next hunk',
+          },
+          {
+            '[c',
+            function()
+              if vim.wo.diff then
+                return '[c'
+              end
+              vim.schedule(function()
+                gs.prev_hunk()
+              end)
+              return '<Ignore>'
+            end,
+            mode = { 'n', 'v' },
+            expr = true,
+            buffer = bufnr,
+            desc = 'Jump to previous hunk',
+          },
+        }
       end,
     },
   },
@@ -276,21 +296,20 @@ pcall(require('telescope').load_extension, 'fzf')
 
 -- See `:help telescope.builtin`
 
-vim.keymap.set('n', 'H', '<cmd>bp<cr>', { desc = 'Previous Buffer' })
-vim.keymap.set('n', 'L', '<cmd>bn<cr>', { desc = 'Next Buffer' })
-
-vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = 'Find Recently Opened Files' })
-vim.keymap.set('n', '<leader><space>', require('telescope.builtin').find_files, { desc = 'Find File' })
-vim.keymap.set('n', '<leader>/', require('telescope.builtin').live_grep, { desc = 'Live Grep' })
-
-vim.keymap.set('n', '<localleader><localleader>', require('telescope.builtin').buffers, { desc = 'Find Buffers' })
-vim.keymap.set('n', '<localleader>/', require('telescope.builtin').current_buffer_fuzzy_find, { desc = 'Grep Current Buffer' })
-
-vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = 'Search [F]iles' })
-vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = 'Search [H]elp' })
-vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = 'Search Current [W]ord' })
-vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = 'Search [D]iagnostics' })
-vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 'Search [R]esume' })
+require('which-key').add {
+  { 'H', '<cmd>bp<cr>', mode = 'n', desc = 'Previous Buffer' },
+  { 'L', '<cmd>bn<cr>', mode = 'n', desc = 'Next Buffer' },
+  { '<leader>?', require('telescope.builtin').oldfiles, mode = 'n', desc = 'Find Recently Opened Files' },
+  { '<leader><space>', require('telescope.builtin').find_files, mode = 'n', desc = 'Find File' },
+  { '<leader>/', require('telescope.builtin').live_grep, mode = 'n', desc = 'Live Grep' },
+  { '<localleader><localleader>', require('telescope.builtin').buffers, mode = 'n', desc = 'Find Buffers' },
+  { '<localleader>/', require('telescope.builtin').current_buffer_fuzzy_find, mode = 'n', desc = 'Grep Current Buffer' },
+  { '<leader>sf', require('telescope.builtin').find_files, mode = 'n', desc = 'Search [F]iles' },
+  { '<leader>sh', require('telescope.builtin').help_tags, mode = 'n', desc = 'Search [H]elp' },
+  { '<leader>sw', require('telescope.builtin').grep_string, mode = 'n', desc = 'Search Current [W]ord' },
+  { '<leader>sd', require('telescope.builtin').diagnostics, mode = 'n', desc = 'Search [D]iagnostics' },
+  { '<leader>sr', require('telescope.builtin').resume, mode = 'n', desc = 'Search [R]esume' },
+}
 
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
@@ -381,10 +400,12 @@ vim.defer_fn(function()
 end, 0)
 
 -- Diagnostic keymaps
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+require('which-key').add {
+  { '[d', vim.diagnostic.goto_prev, mode = 'n', desc = 'Go to previous diagnostic message' },
+  { ']d', vim.diagnostic.goto_next, mode = 'n', desc = 'Go to next diagnostic message' },
+  { '<leader>e', vim.diagnostic.open_float, mode = 'n', desc = 'Open floating diagnostic message' },
+  { '<leader>q', vim.diagnostic.setloclist, mode = 'n', desc = 'Open diagnostics list' },
+}
 
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
@@ -396,11 +417,13 @@ local on_attach = function(client, bufnr)
   -- In this case, we create a function that lets us more easily define mappings specific
   -- for LSP related items. It sets the mode, buffer and description for us each time.
   local nmap = function(keys, func, desc)
-    -- if desc then
-    --   desc = 'LSP: ' .. desc
-    -- end
+    if desc then
+      desc = 'LSP: ' .. desc
+    end
 
-    vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
+    require('which-key').add {
+      { keys, func, mode = 'n', buffer = bufnr, desc = desc },
+    }
   end
 
   nmap('<leader>crn', vim.lsp.buf.rename, 'Re[n]ame')
@@ -415,7 +438,9 @@ local on_attach = function(client, bufnr)
 
   -- See `:help K` for why this keymap
   nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-  nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
+  require('which-key').add {
+    { '<C-k>', vim.lsp.buf.signature_help, mode = { 'n', 'i' }, buffer = bufnr, desc = 'Signature Documentation' },
+  }
 
   -- Lesser used LSP functionality
   nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
@@ -436,23 +461,35 @@ local on_attach = function(client, bufnr)
 end
 
 -- document existing key chains
-require('which-key').register {
-  ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-  ['<leader>cr'] = { name = '[R]efactor', _ = 'which_key_ignore' },
-  ['<leader>cs'] = { name = '[S]ymbols', _ = 'which_key_ignore' },
-  ['<leader>cw'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-  ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-  ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
-  ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-  ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-  ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+require('which-key').add {
+  { '<leader>l', require('lazy').show, desc = '[L]azy' },
+  { '<leader>c', group = '[C]ode' },
+  { '<leader>c_', hidden = true },
+  { '<leader>cr', group = '[R]efactor' },
+  { '<leader>cr_', hidden = true },
+  { '<leader>cs', group = '[S]ymbols' },
+  { '<leader>cs_', hidden = true },
+  { '<leader>cw', group = '[W]orkspace' },
+  { '<leader>cw_', hidden = true },
+  { '<leader>d', group = '[D]ocument' },
+  { '<leader>d_', hidden = true },
+  { '<leader>h', group = 'Git [H]unk' },
+  { '<leader>h_', hidden = true },
+  { '<leader>r', group = '[R]ename' },
+  { '<leader>r_', hidden = true },
+  { '<leader>s', group = '[S]earch' },
+  { '<leader>s_', hidden = true },
+  { '<leader>w', group = '[W]orkspace' },
+  { '<leader>w_', hidden = true },
 }
 
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
 require('mason').setup()
 require('mason-lspconfig').setup()
-vim.keymap.set('n', '<leader>cm', '<cmd>Mason<cr>', { desc = '[M]ason' })
+require('which-key').add {
+  { '<leader>cm', '<cmd>Mason<cr>', desc = '[M]ason' },
+}
 
 -- Enable the following language servers
 --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -506,9 +543,13 @@ mason_lspconfig.setup_handlers {
 }
 
 -- Custom LSP stuff
-vim.cmd([[au BufNewFile,BufRead *.v set filetype=vlang]])
+vim.cmd [[au BufNewFile,BufRead *.v set filetype=vlang]]
 
-require('lspconfig').hls.setup {on_attach = on_attach}
+require('lspconfig').hls.setup { on_attach = on_attach }
+require('lspconfig').zls.setup {
+  on_attach = on_attach,
+  enable_build_on_save = true,
+}
 
 -- Null LS (https://github.com/nvimtools/none-ls.nvim)
 local null_ls = require 'null-ls'
