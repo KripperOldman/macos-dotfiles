@@ -150,6 +150,9 @@ in
 
       # For [image.nvim](https://github.com/3rd/image.nvim#tmux)
       set -gq allow-passthrough on
+      
+      # Neovim asked for this
+      set-option -sg escape-time 10
     '';
   };
 
@@ -170,8 +173,6 @@ in
   };
 
   home.packages = with pkgs; [
-    unstable.neovim
-
     # Some basics
     coreutils
     curl
@@ -191,8 +192,13 @@ in
 
     vim
     # neovim
+    unstable.neovim
     page
     tree-sitter
+    luajit
+    luajitPackages.luarocks
+    viu
+    chafa
 
     ghidra
 
