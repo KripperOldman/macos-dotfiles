@@ -12,6 +12,11 @@
 
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    #
+    # lix-module = {
+    #   url = "https://git.lix.systems/lix-project/nixos-module/archive/2.92.0.tar.gz";
+    #   inputs.nixpkgs.follows = "nixpkgs-unstable";
+    # };
 
     # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
     mac-app-util.url = "github:hraban/mac-app-util";
@@ -35,6 +40,18 @@
           })
         );
       };
+
+      configuration =
+        { pkgs, config, ... }:
+        {
+          system.primaryUser = "bnrwrr";
+        };
+
+      lix = 
+        { pkgs, config, ... }:
+        {
+          nix.package = pkgs.lixPackageSets.stable.lix;
+        };
     in
     {
       # My `nix-darwin` configs
@@ -43,6 +60,9 @@
         macbook-air = darwinSystem {
           system = "aarch64-darwin";
           modules = attrValues self.darwinModules ++ [
+            configuration
+            # Add Lix
+            lix
 
             # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
             mac-app-util.darwinModules.default

@@ -12,38 +12,46 @@
     onActivation = {
       autoUpdate = true;
       # remove all homebrew-installed things not listed here 
-      cleanup = "zap";
+      # cleanup = "zap";
       extraFlags = [ "--verbose" ];
     };
     brews = [
       # "ollama"
+      "minimal-racket"
+
     ];
     casks = [
       # "idafree"
-      "postman"
       "adobe-acrobat-reader"
       "bitwarden"
       "dbeaver-community"
       "firefox@developer-edition"
+      "chromium"
       "mullvadvpn"
       "spotify"
       "flameshot"
       "openvpn-connect"
       "datagrip"
-      "clion"
+      # "clion"
       "stremio"
+      "qbittorrent"
+
+      "balenaetcher"
 
       "nheko" # matrix client
+      "signal"
 
       # "calibre"
       # "kindle-previewer"
       "vlc"
 
+      "krita"
+
       # "dyalog"
 
       "zoom"
 
-      "logisim-evolution"
+      # "logisim-evolution"
 
       "microsoft-office"
     ];
@@ -64,8 +72,6 @@
     ];
   };
 
-  nix.configureBuildUsers = true;
-
   # Enable experimental nix command and flakes
   # nix.package = pkgs.nixUnstable;
   nix.extraOptions = ''
@@ -79,9 +85,6 @@
   programs.zsh.enable = true;
   programs.zsh.promptInit = "";
 
-  # Auto upgrade nix package and the daemon service.
-  services.nix-daemon.enable = true;
-
   # Apps
   # `home-manager` currently has issues adding them to `~/Applications`
   # Issue: https://github.com/nix-community/home-manager/issues/1341
@@ -91,21 +94,25 @@
   programs.nix-index.enable = true;
 
   # Fonts
-  fonts.packages = with pkgs; [
-    recursive
-    (nerdfonts.override { fonts = [ "FiraCode" "JetBrainsMono" ]; })
+  # fonts.packages = with pkgs; [
+  #   recursive
+  #   (nerdfonts.override { fonts = [ "FiraCode" "JetBrainsMono" ]; })
+  # ];
+  fonts.packages = with pkgs.nerd-fonts; [
+    fira-code
+    jetbrains-mono
+    iosevka
   ];
 
   # Keyboard
   system.keyboard.enableKeyMapping = true;
   system.keyboard.remapCapsLockToEscape = true;
 
-  # Add ability to used TouchID for sudo authentication
-  security.pam.enableSudoTouchIdAuth = true;
-
   nix.gc = {
     automatic = true;
     interval = { Weekday = 0; Hour = 0; Minute = 0; };
     options = "--delete-older-than 30d";
   };
+
+  system.stateVersion = 4;
 }

@@ -27,13 +27,14 @@ in
     autocd = true;
 
     shellAliases = {
+      py = "python3";
       ls = "eza";
       l = "ls -la";
       lt = "ls --long --tree";
       ltg = "ls --long --tree --git-ignore";
       ll = "ls -l";
       config = "nvim --cmd ':cd ~/.config'";
-      update = "darwin-rebuild switch --flake ~/.config/nix-darwin";
+      update = "sudo darwin-rebuild switch --flake ~/.config/nix-darwin";
       init-shell = "nix flake init -t github:nix-community/nix-direnv";
       mknote = "nvim \"$(date -u +%Y-%m-%dT%H%M%SZ).md\"";
     };
@@ -46,9 +47,6 @@ in
         discord_modules="$(find ~/Library/Application\ Support/discord -name 'discord_desktop_core' -exec dirname {} \; | head -n 1)"
         NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix run --impure -- nixpkgs#betterdiscordctl --d-modules "$discord_modules" $@
       }
-
-      # thefuck
-      eval $(thefuck --alias)
 
       # opam
       # [[ ! -r /Users/bnrwrr/.opam/opam-init/init.zsh ]] || source /Users/bnrwrr/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
@@ -100,6 +98,7 @@ in
       core.pager = "nvim -R";
       color.pager = "no";
       init.defaultBranch = "main";
+      credential.helper = "osxkeychain";
     };
   };
 
@@ -113,10 +112,10 @@ in
       enable_audio_bell = false;
       update_check_interval = 0;
     };
-    theme = "Catppuccin-Macchiato";
+    themeFile = "Catppuccin-Macchiato";
     font = {
-      name = "FiraCode Nerd Font Mono";
-      size = lib.mkForce 16;
+      name = "Iosevka Nerd Font Mono";
+      size = lib.mkForce 12;
     };
   };
 
@@ -159,6 +158,7 @@ in
   programs.neovim = {
     extraLuaConfig = lib.fileContents ../nvim/init.lua;
     vimAlias = true;
+    viAlias = true;
     defaultEditor = true;
     withPython3 = true;
     withNodeJs = true;
@@ -182,13 +182,16 @@ in
     parallel
     gnupg
 
+    librewolf
+
+    ollama
+
     direnv
     eza
     ripgrep
     fzf
     fd
     tldr
-    thefuck
 
     vim
     # neovim
@@ -200,12 +203,9 @@ in
     viu
     chafa
 
-    ghidra
-
     discord
     slack
 
-    gimp
     net-news-wire
     mpv
 
@@ -238,14 +238,12 @@ in
 
     pass
 
-    # emacs
     # emacs-macport
     # texlive.combined.scheme-full
     # pngpaste
 
     # Useful nix related tools
     cachix # adding/managing alternative binary caches hosted by Cachix
-    comma # run software from without installing it
     niv # easy dependency management for nix projects
   ] ++ lib.optionals
     stdenv.isDarwin

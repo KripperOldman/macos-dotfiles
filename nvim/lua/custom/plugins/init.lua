@@ -38,31 +38,39 @@ return {
       vim.keymap.set('n', '<leader>g', neogit.open, { desc = 'Neo[G]it' })
     end,
   },
+  -- {
+  --   'kylechui/nvim-surround',
+  --   version = '*', -- Use for stability; omit to use `main` branch for the latest features
+  --   event = 'VeryLazy',
+  --   config = function()
+  --     ---@diagnostic disable-next-line: missing-fields
+  --     require('nvim-surround').setup {}
+  --   end,
+  -- },
   {
-    'kylechui/nvim-surround',
-    version = '*', -- Use for stability; omit to use `main` branch for the latest features
-    event = 'VeryLazy',
+    'nvim-mini/mini.surround',
+    version = '*',
     config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('nvim-surround').setup {}
+      require('mini.surround').setup()
     end,
   },
+
   {
-    'echasnovski/mini.align',
+    'nvim-mini/mini.align',
     version = '*',
     config = function()
       require('mini.align').setup()
     end,
   },
   {
-    'echasnovski/mini.animate',
+    'nvim-mini/mini.animate',
     version = '*',
     config = function()
       require('mini.animate').setup()
     end,
   },
   {
-    'echasnovski/mini.comment',
+    'nvim-mini/mini.comment',
     version = '*',
 
     config = function()
@@ -70,7 +78,7 @@ return {
     end,
   },
   {
-    'echasnovski/mini.cursorword',
+    'nvim-mini/mini.cursorword',
     version = '*',
     config = function()
       require('mini.cursorword').setup()
@@ -106,18 +114,18 @@ return {
       'RainbowMultiDelim',
     },
   },
-  {
-    'github/copilot.vim',
-    config = function()
-      vim.keymap.set('i', '<C-L>', 'copilot#Accept("")', {
-        expr = true,
-        replace_keycodes = false,
-      })
-      vim.g.copilot_assume_mapped = true
-      vim.g.copilot_no_tab_map = true
-      vim.cmd 'Copilot disable'
-    end,
-  },
+  -- {
+  --   'github/copilot.vim',
+  --   config = function()
+  --     vim.keymap.set('i', '<C-L>', 'copilot#Accept("")', {
+  --       expr = true,
+  --       replace_keycodes = false,
+  --     })
+  --     vim.g.copilot_assume_mapped = true
+  --     vim.g.copilot_no_tab_map = true
+  --     vim.cmd 'Copilot disable'
+  --   end,
+  -- },
   {
     'iamcco/markdown-preview.nvim',
     cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
@@ -136,4 +144,12 @@ return {
   --     plugin_manager = 'lazy',
   --   },
   -- },
+  {
+    'skosulor/nibbler',
+    config = function()
+      require('nibbler').setup {
+        display_enabled = true, -- Set to false to disable real-time display (default: true)
+      }
+    end,
+  },
 }
