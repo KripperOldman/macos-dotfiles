@@ -12,39 +12,14 @@ return {
       'haskell',
     }, -- etc
     dependencies = {
-      'wlangstroth/vim-racket',
-      -- {
-      --   'PaterJason/cmp-conjure',
-      --   config = function()
-      --     local cmp = require 'cmp'
-      --     local config = cmp.get_config()
-      --     table.insert(config.sources, {
-      --       name = 'buffer',
-      --       option = {
-      --         sources = {
-      --           { name = 'conjure' },
-      --         },
-      --       },
-      --     })
-      --     cmp.setup(config)
-      --   end,
-      -- },
-
-      'L3MON4D3/LuaSnip',
+      'benknoble/vim-racket',
       {
         'gpanders/nvim-parinfer',
         version = false,
+        config = function ()
+          vim.g.parinfer_force_balance = true
+        end
       },
-      -- {
-      --   'tpope/vim-sexp-mappings-for-regular-people',
-      --   version = false,
-      --   dependencies = {
-      --     'guns/vim-sexp',
-      --   },
-      --   config = function(_, _)
-      --     vim.g.sexp_filetypes = 'lisp,scheme,clojure,fennel,racket'
-      --   end,
-      -- },
       {
         'Grazfather/sexp.nvim',
         dependencies = { 'tpope/vim-repeat' },

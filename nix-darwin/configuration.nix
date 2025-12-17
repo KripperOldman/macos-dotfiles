@@ -12,7 +12,7 @@
     onActivation = {
       autoUpdate = true;
       # remove all homebrew-installed things not listed here 
-      # cleanup = "zap";
+      cleanup = "zap";
       extraFlags = [ "--verbose" ];
     };
     brews = [
@@ -25,26 +25,27 @@
       "adobe-acrobat-reader"
       "bitwarden"
       "dbeaver-community"
-      "firefox@developer-edition"
+      # "firefox@developer-edition"
+      "waterfox"
       "chromium"
-      "mullvadvpn"
+      "mullvad-vpn"
       "spotify"
       "flameshot"
       "openvpn-connect"
-      "datagrip"
+      # "datagrip"
       # "clion"
-      "stremio"
+      # "stremio"
       "qbittorrent"
 
       "balenaetcher"
 
-      "nheko" # matrix client
       "signal"
 
       # "calibre"
       # "kindle-previewer"
       "vlc"
 
+      "gimp"
       "krita"
 
       # "dyalog"
@@ -53,7 +54,7 @@
 
       # "logisim-evolution"
 
-      "microsoft-office"
+      # "microsoft-office"
     ];
     taps = [
       "homebrew/cask-versions"
@@ -99,6 +100,7 @@
   #   (nerdfonts.override { fonts = [ "FiraCode" "JetBrainsMono" ]; })
   # ];
   fonts.packages = with pkgs.nerd-fonts; [
+    symbols-only
     fira-code
     jetbrains-mono
     iosevka

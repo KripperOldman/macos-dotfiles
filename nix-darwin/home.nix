@@ -1,10 +1,10 @@
 { config, pkgs, lib, ... }:
 
-let
-  # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
-  flakePkg = uri:
-    (builtins.getFlake uri).packages.aarch64-darwin.default;
-in
+# let
+#   # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
+#   flakePkg = uri:
+#     (builtins.getFlake uri).packages.aarch64-darwin.default;
+# in
 {
   home.stateVersion = "24.05";
 
@@ -33,26 +33,30 @@ in
       lt = "ls --long --tree";
       ltg = "ls --long --tree --git-ignore";
       ll = "ls -l";
+      cd = "z";
+      cdi = "zi";
       config = "nvim --cmd ':cd ~/.config'";
       update = "sudo darwin-rebuild switch --flake ~/.config/nix-darwin";
       init-shell = "nix flake init -t github:nix-community/nix-direnv";
       mknote = "nvim \"$(date -u +%Y-%m-%dT%H%M%SZ).md\"";
     };
 
-    initExtra = ''
+    initContent = ''
       PATH="$PATH:/opt/homebrew/bin:$HOME/.cargo/bin:$HOME/.local/bin"
-
-      # betterdiscordctl
-      bdctl() {
-        discord_modules="$(find ~/Library/Application\ Support/discord -name 'discord_desktop_core' -exec dirname {} \; | head -n 1)"
-        NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix run --impure -- nixpkgs#betterdiscordctl --d-modules "$discord_modules" $@
-      }
 
       # opam
       # [[ ! -r /Users/bnrwrr/.opam/opam-init/init.zsh ]] || source /Users/bnrwrr/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
 
       # TMUX
       [[ "$TERM" == "xterm-kitty" ]] && tmux new -A -s main
+
+      # function racketi
+      #     if test (count $argv) -eq 0
+      #         echo "Usage: racketi filename"
+      #         return 1
+      #     end
+      #     racket -i -e "(enter! \"$argv[1]\")"
+      # end
     '';
 
     history = {
@@ -71,11 +75,12 @@ in
     };
   };
 
+  programs.zoxide = {
+    enable = true;
+  };
+
   programs.git = {
     enable = true;
-    aliases = {
-      ignore = "!gi() { curl -sL https://www.toptal.com/developers/gitignore/api/$@ ;}; gi";
-    };
     includes = [
       {
         path = "~/Workspace/personal/.gitconfig_include";
@@ -94,12 +99,43 @@ in
         condition = "gitdir:~/Workspace/school/";
       }
     ];
-    extraConfig = {
+    settings = {
       core.pager = "nvim -R";
       color.pager = "no";
       init.defaultBranch = "main";
       credential.helper = "osxkeychain";
+      alias = {
+        ignore = "!gi() { curl -sL https://www.toptal.com/developers/gitignore/api/$@ ;}; gi";
+      };
     };
+  };
+
+  programs.ghostty = {
+    package = pkgs.ghostty-bin;
+    enable = false;
+    settings = {
+      font-family = "Hack Nerd Font Mono";
+      font-size = 9;
+
+      window-padding-x = 0;
+      window-padding-y = 0;
+      window-padding-balance = true;
+
+      window-decoration = "none";
+      window-show-tab-bar = "never";
+
+      clipboard-read = "allow";
+      clipboard-write = "allow";
+
+      initial-command = "tmux new-session";
+
+      # keybind = [
+      #   "ctrl+equal=increase_font_size:1"
+      #   "ctrl+minus=decrease_font_size:1"
+      #   "ctrl+shift+r=reload_config"
+      # ];
+    };
+    # clearDefaultKeybinds = true;
   };
 
   programs.kitty = {
@@ -108,15 +144,20 @@ in
       macos_traditional_fullscreen = true;
       macos_quit_when_last_window_closed = true;
       macos_option_as_alt = true;
-      scrollback_lines = 10000;
       enable_audio_bell = false;
       update_check_interval = 0;
     };
     themeFile = "Catppuccin-Macchiato";
     font = {
       name = "Iosevka Nerd Font Mono";
-      size = lib.mkForce 12;
+      size = lib.mkForce 14;
     };
+    extraConfig = ''
+      # clear_all_shortcuts yes
+      # map ctrl+shift+equal change_font_size current +1.0
+      # map ctrl+shift+minus change_font_size current -1.0
+      window_padding_width 0
+    '';
   };
 
   programs.tmux = {
@@ -165,6 +206,11 @@ in
     withRuby = true;
   };
 
+  programs.doom-emacs = {
+    enable = true;
+    doomDir = ./doom.d;
+  };
+
   home.sessionVariables = {
     EDITOR = "nvim";
     VISUAL = "nvim";
@@ -182,9 +228,7 @@ in
     parallel
     gnupg
 
-    librewolf
-
-    ollama
+    # ollama
 
     direnv
     eza
@@ -203,10 +247,9 @@ in
     viu
     chafa
 
+    vesktop # vencord
     discord
-    slack
 
-    net-news-wire
     mpv
 
     # Dev stuff
@@ -227,7 +270,7 @@ in
     gcc
     zig
 
-    aria
+    aria2
 
     # opam
 
@@ -252,35 +295,35 @@ in
       m-cli # useful macOS CLI commands
     ];
 
-  # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
-  home.activation.aliasApplications = lib.mkIf
-    pkgs.stdenv.hostPlatform.isDarwin
-    (
-      let
-        apps = pkgs.buildEnv {
-          name = "home-manager-applications";
-          paths = config.home.packages;
-          pathsToLink = "/Applications";
-        };
-        lastAppsFile = "${config.xdg.stateHome}/nix/.apps";
-      in
-      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        last_apps=$(cat "${lastAppsFile}" 2>/dev/null || echo "")
-        next_apps=$(readlink -f ${apps}/Applications/* | sort)
-
-        if [ "$last_apps" != "$next_apps" ]; then
-          echo "Apps have changed. Updating macOS aliases..."
-
-          apps_path="$HOME/Applications/NixApps"
-          $DRY_RUN_CMD mkdir -p "$apps_path"
-
-          $DRY_RUN_CMD ${pkgs.fd}/bin/fd \
-            -t l -d 1 . ${apps}/Applications \
-            -x $DRY_RUN_CMD "${flakePkg "github:reckenrode/mkAlias/8a5478cdb646f137ebc53cb9d235f8e5892ea00a"}/bin/mkalias" \
-            -L {} "$apps_path/{/}"
-
-          [ -z "$DRY_RUN_CMD" ] && echo "$next_apps" > "${lastAppsFile}"
-        fi
-      ''
-    );
+  # # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
+  # home.activation.aliasApplications = lib.mkIf
+  #   pkgs.stdenv.hostPlatform.isDarwin
+  #   (
+  #     let
+  #       apps = pkgs.buildEnv {
+  #         name = "home-manager-applications";
+  #         paths = config.home.packages;
+  #         pathsToLink = "/Applications";
+  #       };
+  #       lastAppsFile = "${config.xdg.stateHome}/nix/.apps";
+  #     in
+  #     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  #       last_apps=$(cat "${lastAppsFile}" 2>/dev/null || echo "")
+  #       next_apps=$(readlink -f ${apps}/Applications/* | sort)
+  #
+  #       if [ "$last_apps" != "$next_apps" ]; then
+  #         echo "Apps have changed. Updating macOS aliases..."
+  #
+  #         apps_path="$HOME/Applications/NixApps"
+  #         $DRY_RUN_CMD mkdir -p "$apps_path"
+  #
+  #         $DRY_RUN_CMD ${pkgs.fd}/bin/fd \
+  #           -t l -d 1 . ${apps}/Applications \
+  #           -x $DRY_RUN_CMD "${flakePkg "github:reckenrode/mkAlias/8a5478cdb646f137ebc53cb9d235f8e5892ea00a"}/bin/mkalias" \
+  #           -L {} "$apps_path/{/}"
+  #
+  #         [ -z "$DRY_RUN_CMD" ] && echo "$next_apps" > "${lastAppsFile}"
+  #       fi
+  #     ''
+  #   );
 }

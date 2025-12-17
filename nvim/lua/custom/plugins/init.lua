@@ -62,13 +62,13 @@ return {
       require('mini.align').setup()
     end,
   },
-  {
-    'nvim-mini/mini.animate',
-    version = '*',
-    config = function()
-      require('mini.animate').setup()
-    end,
-  },
+  -- {
+  --   'nvim-mini/mini.animate',
+  --   version = '*',
+  --   config = function()
+  --     require('mini.animate').setup()
+  --   end,
+  -- },
   {
     'nvim-mini/mini.comment',
     version = '*',

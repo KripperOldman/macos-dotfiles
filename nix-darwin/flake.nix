@@ -18,12 +18,17 @@
     #   inputs.nixpkgs.follows = "nixpkgs-unstable";
     # };
 
-    # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
-    mac-app-util.url = "github:hraban/mac-app-util";
+    # Emacs
+    nix-doom-emacs-unstraightened.url = "github:marienz/nix-doom-emacs-unstraightened";
+    # Optional, to download less. Neither the module nor the overlay uses this input.
+    nix-doom-emacs-unstraightened.inputs.nixpkgs.follows = "";
+
+    # # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
+    # mac-app-util.url = "github:hraban/mac-app-util";
   };
 
-  # HACK: remove `mac-app-util` when https://github.com/nix-community/home-manager/issues/1341 gets fixed
-  outputs = { self, darwin, nixpkgs, nixpkgs-unstable, home-manager, mac-app-util, ... }@inputs:
+  # # HACK: remove `mac-app-util` when https://github.com/nix-community/home-manager/issues/1341 gets fixed
+  outputs = inputs@{ self, darwin, nixpkgs, nixpkgs-unstable, home-manager, ... }:
     let
 
       inherit (darwin.lib) darwinSystem;
@@ -34,7 +39,7 @@
         config = { allowUnfree = true; };
         overlays = attrValues self.overlays ++ singleton (
           # Sub in x86 version of packages that don't build on Apple Silicon yet
-          final: prev: (optionalAttrs (prev.stdenv.system == "aarch64-darwin") {
+          final: prev: (optionalAttrs (prev.stdenv.hostPlatform.system == "aarch64-darwin") {
             inherit (final.rosetta)
               niv;
           })
@@ -64,9 +69,8 @@
             # Add Lix
             lix
 
-            # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
-            mac-app-util.darwinModules.default
-
+            # # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
+            # mac-app-util.darwinModules.default
             # Main `nix-darwin` config
             ./configuration.nix
             # `home-manager` module
@@ -78,11 +82,13 @@
               home-manager.useUserPackages = true;
               home-manager.users.bnrwrr.imports = [
 
-                # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
-                mac-app-util.homeManagerModules.default
+                # # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
+                # mac-app-util.homeManagerModules.default
 
+                inputs.nix-doom-emacs-unstraightened.homeModule
                 ./home.nix
               ];
+              home-manager.extraSpecialArgs = { inherit inputs; };
             }
           ];
         };
@@ -93,7 +99,7 @@
       overlays = {
         # Overlays to add various packages into package set
         # Overlay useful on Macs with Apple Silicon
-        apple-silicon = final: prev: optionalAttrs (prev.stdenv.system == "aarch64-darwin") {
+        apple-silicon = final: prev: optionalAttrs (prev.stdenv.hostPlatform.system == "aarch64-darwin") {
           # Add access to x86 packages system is running Apple Silicon
           rosetta = import inputs.nixpkgs-unstable {
             system = "x86_64-darwin"; inherit (nixpkgsConfig) config;
