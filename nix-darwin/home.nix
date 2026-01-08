@@ -254,6 +254,7 @@
 
     # Dev stuff
     jq
+    rlwrap
     nodePackages.typescript
     nodejs
     python3
@@ -263,7 +264,6 @@
     cargo
     rustc
     prettierd
-    go
     clojure
     leiningen
     babashka
@@ -281,9 +281,8 @@
 
     pass
 
-    # emacs-macport
-    # texlive.combined.scheme-full
-    # pngpaste
+    texlive.combined.scheme-full
+    pngpaste
 
     # Useful nix related tools
     cachix # adding/managing alternative binary caches hosted by Cachix
