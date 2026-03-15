@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 # let
 #   # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed
@@ -281,6 +281,7 @@
 
     pass
 
+    typst
     texlive.combined.scheme-full
     pngpaste
 
@@ -292,6 +293,8 @@
     [
       cocoapods
       m-cli # useful macOS CLI commands
+    ] ++ [
+      inputs.pwndbg.packages.aarch64-darwin.pwndbg-lldb
     ];
 
   # # HACK: remove when https://github.com/nix-community/home-manager/issues/1341 gets fixed

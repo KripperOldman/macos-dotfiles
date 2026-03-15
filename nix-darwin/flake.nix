@@ -18,6 +18,9 @@
     #   inputs.nixpkgs.follows = "nixpkgs-unstable";
     # };
 
+    pwndbg.url = "github:pwndbg/pwndbg";
+    pwndbg.inputs.nixpkgs.follows = "nixpkgs-unstable";
+
     # Emacs
     nix-doom-emacs-unstraightened.url = "github:marienz/nix-doom-emacs-unstraightened";
     # Optional, to download less. Neither the module nor the overlay uses this input.
@@ -28,7 +31,7 @@
   };
 
   # # HACK: remove `mac-app-util` when https://github.com/nix-community/home-manager/issues/1341 gets fixed
-  outputs = inputs@{ self, darwin, nixpkgs, nixpkgs-unstable, home-manager, ... }:
+  outputs = inputs@{ self, darwin, nixpkgs, nixpkgs-unstable, home-manager, pwndbg, ... }:
     let
 
       inherit (darwin.lib) darwinSystem;

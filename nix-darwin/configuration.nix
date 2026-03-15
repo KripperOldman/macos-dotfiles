@@ -17,6 +17,7 @@
     };
     brews = [
       # "ollama"
+      "ghidra"
       "minimal-racket"
 
     ];

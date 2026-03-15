@@ -13,13 +13,13 @@ return {
     }, -- etc
     dependencies = {
       'benknoble/vim-racket',
-      {
-        'gpanders/nvim-parinfer',
-        version = false,
-        config = function ()
-          vim.g.parinfer_force_balance = true
-        end
-      },
+      -- {
+      --   'gpanders/nvim-parinfer',
+      --   version = false,
+      --   config = function ()
+      --     vim.g.parinfer_force_balance = true
+      --   end
+      -- },
       {
         'Grazfather/sexp.nvim',
         dependencies = { 'tpope/vim-repeat' },
